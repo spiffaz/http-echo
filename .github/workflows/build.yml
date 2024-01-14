@@ -121,10 +121,10 @@ jobs:
           target: default
           arch: ${{ matrix.arch }}
           tags: |
-            docker.io/hashicorp/${{env.repo}}:${{env.version}}
+            docker.io/spiffaz/${{env.repo}}:${{env.version}}
           dev_tags: |
-            docker.io/hashicorppreview/${{ env.repo }}:${{ env.version }}-dev
-            docker.io/hashicorppreview/${{ env.repo }}:${{ env.version }}-${{ github.sha }}
+            docker.io/spiffaz/${{ env.repo }}:${{ env.version }}-dev
+            docker.io/spiffaz/${{ env.repo }}:${{ env.version }}-${{ github.sha }}
         
   build:
     runs-on: ubuntu-latest
