@@ -205,10 +205,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Get EC2 instances with a specific tag
+      - name: Get running EC2 instances with a specific tag
         run: |
-          instances=$(aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId]' --filter "Name=tag:Name,Values=Microservice-asg" --filter "Name=instance-state-name,Values=running" --output json)
-          echo "EC2 Instances with the specified tag: $instances"
+          instances=$(aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId]' \
+                       --filter "Name=tag:Name,Values=Microservice-asg" \
+                       --output json)
+
+          # Extract instance IDs and format them
+          formatted_instances=""
+          for id in $(echo $instances | jq -r '.[]'); do
+            formatted_instances+="  $id"$'\n'
+          done
+
+          echo "Running EC2 Instances with the specified tag: $formatted_instances"
         
       # - name: AWS SSM Send-Command
       #   uses: peterkimzz/aws-ssm-send-command@v1.1.1
