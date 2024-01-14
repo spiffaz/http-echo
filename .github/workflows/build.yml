@@ -214,12 +214,12 @@ jobs:
                        --output json)
 
           # Remove square brackets and quotes, and replace commas with new lines
-          formatted-instance-ids=$(echo $instances | jq -r '.[] | @text' | tr -d '[],"')
+          formatted_instances=$(echo $instances | jq -r '.[] | @text' | tr -d '[],"')
 
-          echo "Running EC2 Instances with the specified tag: $formatted-instance-ids"
+          echo "Running EC2 Instances with the specified tag: $formatted_instances"
 
           # Set the output variable
-          echo "::set-output name=formatted-instance-ids::$formatted-instance-ids"
+          echo "::set-output name=instance-ids::$formatted_instances"
 
       - name: AWS SSM Send-Command
         uses: peterkimzz/aws-ssm-send-command@v1.1.1
