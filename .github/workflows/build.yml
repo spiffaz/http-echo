@@ -185,8 +185,8 @@ jobs:
 #             BIN_NAME=${{env.repo}}
             
   CD:
-    needs:
-      - CI-build-docker-default
+    # needs:
+    #   - CI-build-docker-default
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -207,30 +207,8 @@ jobs:
 
       - name: Get EC2 instances with a specific tag
         run: |
-          instances=$(aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId]' --filter "Name=tag:Name,Values=Microservice-asg" --output json)
+          instances=$(aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId]' --filter "Name=tag:Name,Values=Microservice-asg" --filter "Name=instance-state-name,Values=running" --output json)
           echo "EC2 Instances with the specified tag: $instances"
-
-      - name: Install Python
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-
-      - name: Install boto library
-        run: pip3 install boto
-
-      - name: Download ec2.py script
-        run: |
-          curl -O https://raw.githubusercontent.com/vshn/ansible-dynamic-inventory-ec2/master/ec2.py
-
-      - name: Download ec2.ini script
-        run: |
-          curl -O https://raw.githubusercontent.com/willthames/ansible-ec2-example/master/ec2.ini
-
-      - name: Change permissions for ec2.py
-        run: chmod 755 ec2.py
-
-      - name: Run ec2.py script
-        run: ./ec2.py --list
         
       # - name: AWS SSM Send-Command
       #   uses: peterkimzz/aws-ssm-send-command@v1.1.1
