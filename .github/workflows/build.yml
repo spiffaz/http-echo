@@ -136,7 +136,7 @@ jobs:
           context: ./
           push: true
           dockerfile: ./Dockerfile
-          tags: spiffaz/${{env.repo}}:${{env.version}}
+          tags: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
           build-args: |
             TARGETOS=linux
             TARGETARCH=${{ matrix.arch }}
