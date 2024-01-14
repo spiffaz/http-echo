@@ -226,9 +226,10 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
           instance-ids: ${{ steps.ec2instances.outputs.instance-ids }}
           command: |
             sudo docker run -d -p 5678:8080 --name http-echo spiffaz/http-echo:amd64-1.0.1
             sudo docker image prune -af
           # Comment for Send-Command
-          comment: docker-compose.yml file re-pulls newer versions of book-portal images and runs them on the instance.
+          comment: Deployed http-echo
