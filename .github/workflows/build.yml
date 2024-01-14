@@ -147,18 +147,18 @@ jobs:
         uses: Azure/container-scan@v0
         id: scan
         with:
-          image-ref: ${{ steps.build.outputs.image }}
+          image: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
 
       # - name: Save Scan Report
       #   run: echo "${{ steps.scan.outputs.scan-report }}" > scan-report.json
 
-      # - name: Email Notification
-      #   uses: jasonet/mail-action@v3
+      # - name: Email Notification with scan result
+      #   uses: dawidd6/action-send-mail@v3
       #   with:
       #     server_address: smtp.example.com
       #     server_port: 587
-      #     username: ${{ secrets.EMAIL_USERNAME }}
-      #     password: ${{ secrets.EMAIL_PASSWORD }}
+      #     username: ${{ secrets.MAIL_USERNAME }}
+      #     password: ${{ secrets.MAIL_PASSWORD }}
       #     subject: "Docker Scan Report - spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}"
       #     body: "Attached is the Docker scan report for spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}."
       #     to: ${{ secrets.EMAIL_TO }}
