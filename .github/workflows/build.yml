@@ -58,7 +58,7 @@ jobs:
           name: metadata.json
           path: ${{ steps.generate-metadata-file.outputs.filepath }}
 
-  build-linux:
+  CI-build-linux:
     needs:
       - get-go-version
       - set-product-version
@@ -90,11 +90,11 @@ jobs:
           instructions: |
             make build
             
-  build-docker-default:
+  CI-build-docker-default:
     name: Docker ${{ matrix.arch }} default release build
     needs:
       - set-product-version
-      - build-linux
+      - CI-build-linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -122,14 +122,55 @@ jobs:
           arch: ${{ matrix.arch }}
           tags: |
             docker.io/spiffaz/${{env.repo}}:${{env.version}}
+      
+      
+      # End of Hashicorp CI process, start of mine
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Build Docker image
+        id: build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          push: false  # Set to false as we only want to build for scanning
+          dockerfile: ./Dockerfile
+          tags: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
+          build-args: |
+            TARGETOS=linux
+            TARGETARCH=${{ matrix.arch }}
+            PRODUCT_VERSION=${{env.version}}
+            BIN_NAME=${{env.repo}}
+
+      - name: Scan Docker container for vulnerabilities
+        uses: Azure/container-scan@v0
+        id: scan
+        with:
+          image-ref: ${{ steps.build.outputs.image }}
+
+      # - name: Save Scan Report
+      #   run: echo "${{ steps.scan.outputs.scan-report }}" > scan-report.json
+
+      # - name: Email Notification
+      #   uses: jasonet/mail-action@v3
+      #   with:
+      #     server_address: smtp.example.com
+      #     server_port: 587
+      #     username: ${{ secrets.EMAIL_USERNAME }}
+      #     password: ${{ secrets.EMAIL_PASSWORD }}
+      #     subject: "Docker Scan Report - spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}"
+      #     body: "Attached is the Docker scan report for spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}."
+      #     to: ${{ secrets.EMAIL_TO }}
+      #     from: ${{ secrets.EMAIL_FROM }}
+      #     attachments: scan-report.json
+        
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -142,5 +183,3 @@ jobs:
             TARGETARCH=${{ matrix.arch }}
             PRODUCT_VERSION=${{env.version}}
             BIN_NAME=${{env.repo}}
-
-        
