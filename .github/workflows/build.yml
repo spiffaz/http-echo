@@ -6,183 +6,183 @@ env:
   PKG_NAME: "http-echo"
 
 jobs:
-  get-go-version:
-    name: "Determine Go toolchain version"
-    runs-on: ubuntu-latest
-    outputs:
-      go-version: ${{ steps.get-go-version.outputs.go-version }}
-    steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
-        with:
-          # This is the minimum required version. Go 1.21+ should pull in new 
-          # toolchains as indicated in go.mod.
-          go-version: '1.21'
-      - name: Determine Go version
-        id: get-go-version
-        # With go1.21+, we can use `go version` to print out the exact toolchain that will be used
-        run: |
-          echo "Building with Go $(go version | awk '{print $3}' | sed -e 's/^go//')"
-          echo "go-version=$(go version | awk '{print $3}' | sed -e 's/^go//')" >> $GITHUB_OUTPUT
+#   get-go-version:
+#     name: "Determine Go toolchain version"
+#     runs-on: ubuntu-latest
+#     outputs:
+#       go-version: ${{ steps.get-go-version.outputs.go-version }}
+#     steps:
+#       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+#       - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+#         with:
+#           # This is the minimum required version. Go 1.21+ should pull in new 
+#           # toolchains as indicated in go.mod.
+#           go-version: '1.21'
+#       - name: Determine Go version
+#         id: get-go-version
+#         # With go1.21+, we can use `go version` to print out the exact toolchain that will be used
+#         run: |
+#           echo "Building with Go $(go version | awk '{print $3}' | sed -e 's/^go//')"
+#           echo "go-version=$(go version | awk '{print $3}' | sed -e 's/^go//')" >> $GITHUB_OUTPUT
 
-  set-product-version:
-    runs-on: ubuntu-latest
-    outputs:
-      product-version: ${{ steps.set-product-version.outputs.product-version }}
-      product-base-version: ${{ steps.set-product-version.outputs.base-product-version }}
-      product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
-    steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - name: Set Product version
-        id: set-product-version
-        uses: hashicorp/actions-set-product-version@v1
+#   set-product-version:
+#     runs-on: ubuntu-latest
+#     outputs:
+#       product-version: ${{ steps.set-product-version.outputs.product-version }}
+#       product-base-version: ${{ steps.set-product-version.outputs.base-product-version }}
+#       product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
+#     steps:
+#       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+#       - name: Set Product version
+#         id: set-product-version
+#         uses: hashicorp/actions-set-product-version@v1
 
-  generate-metadata-file:
-    needs: set-product-version
-    runs-on: ubuntu-latest
-    outputs:
-      filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
-    steps:
-      - name: "Checkout directory"
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - name: Generate metadata file
-        id: generate-metadata-file
-        uses: hashicorp/actions-generate-metadata@v1
-        with:
-          version: ${{ needs.set-product-version.outputs.product-version }}
-          product: ${{ env.PKG_NAME }}
-          repositoryOwner: "hashicorp"
-          repository: "http-echo"
-      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-        with:
-          name: metadata.json
-          path: ${{ steps.generate-metadata-file.outputs.filepath }}
+#   generate-metadata-file:
+#     needs: set-product-version
+#     runs-on: ubuntu-latest
+#     outputs:
+#       filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
+#     steps:
+#       - name: "Checkout directory"
+#         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+#       - name: Generate metadata file
+#         id: generate-metadata-file
+#         uses: hashicorp/actions-generate-metadata@v1
+#         with:
+#           version: ${{ needs.set-product-version.outputs.product-version }}
+#           product: ${{ env.PKG_NAME }}
+#           repositoryOwner: "hashicorp"
+#           repository: "http-echo"
+#       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+#         with:
+#           name: metadata.json
+#           path: ${{ steps.generate-metadata-file.outputs.filepath }}
 
-  CI-build-linux:
-    needs:
-      - get-go-version
-      - set-product-version
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux]
-        goarch: ["arm", "arm64", "386", "amd64"]
+#   CI-build-linux:
+#     needs:
+#       - get-go-version
+#       - set-product-version
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         goos: [linux]
+#         goarch: ["arm", "arm64", "386", "amd64"]
 
-      fail-fast: true
+#       fail-fast: true
 
-    name: Go ${{ needs.get-go-version.outputs.go-version }} ${{ matrix.goos }} ${{ matrix.goarch }} build
+#     name: Go ${{ needs.get-go-version.outputs.go-version }} ${{ matrix.goos }} ${{ matrix.goarch }} build
 
-    steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+#     steps:
+#       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
-      - uses: hashicorp/actions-go-build@v0.1.7
-        env:
-          BASE_VERSION: ${{ needs.set-product-version.outputs.product-base-version }}
-          PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version}}
-          METADATA_VERSION: ${{ env.METADATA }}
-        with:
-          product_name: ${{ env.PKG_NAME }}
-          product_version: ${{ needs.set-product-version.outputs.product-version }}
-          go_version: ${{ needs.get-go-version.outputs.go-version }}
-          os: ${{ matrix.goos }}
-          arch: ${{ matrix.goarch }}
-          reproducible: report
-          instructions: |
-            make build
+#       - uses: hashicorp/actions-go-build@v0.1.7
+#         env:
+#           BASE_VERSION: ${{ needs.set-product-version.outputs.product-base-version }}
+#           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version}}
+#           METADATA_VERSION: ${{ env.METADATA }}
+#         with:
+#           product_name: ${{ env.PKG_NAME }}
+#           product_version: ${{ needs.set-product-version.outputs.product-version }}
+#           go_version: ${{ needs.get-go-version.outputs.go-version }}
+#           os: ${{ matrix.goos }}
+#           arch: ${{ matrix.goarch }}
+#           reproducible: report
+#           instructions: |
+#             make build
             
-  CI-build-docker-default:
-    name: Docker ${{ matrix.arch }} default release build
-    needs:
-      - set-product-version
-      - CI-build-linux
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: ["arm64", "amd64"]
-    env:
-      repo: ${{ github.event.repository.name }}
-      version: ${{ needs.set-product-version.outputs.product-version }}
+#   CI-build-docker-default:
+#     name: Docker ${{ matrix.arch }} default release build
+#     needs:
+#       - set-product-version
+#       - CI-build-linux
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         arch: ["arm64", "amd64"]
+#     env:
+#       repo: ${{ github.event.repository.name }}
+#       version: ${{ needs.set-product-version.outputs.product-version }}
 
-    steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v1
-        with:
-          smoke_test: |
-            TEST_VERSION="$(docker run "${IMAGE_NAME}" -version | awk '/http-echo/{print $2}' | sed s/v//)"
-            if [ "${TEST_VERSION}" != "${version}" ]; then
-              echo "Test FAILED"
-              echo "Test Version: ${TEST_VERSION}"
-              echo "Version: ${version}"
-              exit 1
-            fi
-            echo "Test PASSED"
-          version: ${{ env.version }}
-          target: default
-          arch: ${{ matrix.arch }}
-          tags: |
-            docker.io/spiffaz/${{env.repo}}:${{env.version}}
+#     steps:
+#       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+#       - name: Docker Build (Action)
+#         uses: hashicorp/actions-docker-build@v1
+#         with:
+#           smoke_test: |
+#             TEST_VERSION="$(docker run "${IMAGE_NAME}" -version | awk '/http-echo/{print $2}' | sed s/v//)"
+#             if [ "${TEST_VERSION}" != "${version}" ]; then
+#               echo "Test FAILED"
+#               echo "Test Version: ${TEST_VERSION}"
+#               echo "Version: ${version}"
+#               exit 1
+#             fi
+#             echo "Test PASSED"
+#           version: ${{ env.version }}
+#           target: default
+#           arch: ${{ matrix.arch }}
+#           tags: |
+#             docker.io/spiffaz/${{env.repo}}:${{env.version}}
       
       
-      # End of Hashicorp CI process, start of mine
+#       # End of Hashicorp CI process, start of mine
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v1
 
-      - name: Build Docker image
-        id: build
-        uses: docker/build-push-action@v2
-        with:
-          context: ./
-          push: false  # Set to false as we only want to build for scanning
-          dockerfile: ./Dockerfile
-          tags: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
-          build-args: |
-            TARGETOS=linux
-            TARGETARCH=${{ matrix.arch }}
-            PRODUCT_VERSION=${{env.version}}
-            BIN_NAME=${{env.repo}}
+#       - name: Build Docker image
+#         id: build
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: ./
+#           push: false  # Set to false as we only want to build for scanning
+#           dockerfile: ./Dockerfile
+#           tags: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
+#           build-args: |
+#             TARGETOS=linux
+#             TARGETARCH=${{ matrix.arch }}
+#             PRODUCT_VERSION=${{env.version}}
+#             BIN_NAME=${{env.repo}}
 
-      - name: Scan Docker container for vulnerabilities
-        uses: Azure/container-scan@v0
-        id: scan
-        with:
-          image-name: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
+#       - name: Scan Docker container for vulnerabilities
+#         uses: Azure/container-scan@v0
+#         id: scan
+#         with:
+#           image-name: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
 
-      # - name: Save Scan Report
-      #   run: echo "${{ steps.scan.outputs.scan-report }}" > scan-report.json
+#       # - name: Save Scan Report
+#       #   run: echo "${{ steps.scan.outputs.scan-report }}" > scan-report.json
 
-      # - name: Email Notification with scan result
-      #   uses: dawidd6/action-send-mail@v3
-      #   with:
-      #     server_address: smtp.example.com
-      #     server_port: 587
-      #     username: ${{ secrets.MAIL_USERNAME }}
-      #     password: ${{ secrets.MAIL_PASSWORD }}
-      #     subject: "Docker Scan Report - spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}"
-      #     body: "Attached is the Docker scan report for spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}."
-      #     to: ${{ secrets.EMAIL_TO }}
-      #     from: ${{ secrets.EMAIL_FROM }}
-      #     attachments: scan-report.json
+#       # - name: Email Notification with scan result
+#       #   uses: dawidd6/action-send-mail@v3
+#       #   with:
+#       #     server_address: smtp.example.com
+#       #     server_port: 587
+#       #     username: ${{ secrets.MAIL_USERNAME }}
+#       #     password: ${{ secrets.MAIL_PASSWORD }}
+#       #     subject: "Docker Scan Report - spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}"
+#       #     body: "Attached is the Docker scan report for spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}."
+#       #     to: ${{ secrets.EMAIL_TO }}
+#       #     from: ${{ secrets.EMAIL_FROM }}
+#       #     attachments: scan-report.json
         
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#       - name: Login to DockerHub
+#         uses: docker/login-action@v1
+#         with:
+#           username: ${{ secrets.DOCKERHUB_USERNAME }}
+#           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./
-          push: true
-          dockerfile: ./Dockerfile
-          tags: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
-          build-args: |
-            TARGETOS=linux
-            TARGETARCH=${{ matrix.arch }}
-            PRODUCT_VERSION=${{env.version}}
-            BIN_NAME=${{env.repo}}
+#       - name: Build and push Docker image
+#         uses: docker/build-push-action@v2
+#         with:
+#           context: ./
+#           push: true
+#           dockerfile: ./Dockerfile
+#           tags: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
+#           build-args: |
+#             TARGETOS=linux
+#             TARGETARCH=${{ matrix.arch }}
+#             PRODUCT_VERSION=${{env.version}}
+#             BIN_NAME=${{env.repo}}
             
   CD:
     needs:
@@ -204,6 +204,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
+      - name: Get EC2 instances with a specific tag
+        run: |
+          instances=$(aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId]' --filter "Name=tag:Name,Values=Microservice-asg" --output json)
+          echo "EC2 Instances with the specified tag: $instances"
 
       - name: Install Python
         run: |
