@@ -206,26 +206,29 @@ jobs:
           aws-region: us-east-1
 
       - name: Get running EC2 instances with a specific tag
+        id: ec2instances
         run: |
           instances=$(aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId]' \
                        --filter "Name=tag:Name,Values=Microservice-asg" \
+                       --filter "Name=instance-state-name,Values=running" \
                        --output json)
 
           # Remove square brackets and quotes, and replace commas with new lines
           formatted_instances=$(echo $instances | jq -r '.[] | @text' | tr -d '[],"')
 
           echo "Running EC2 Instances with the specified tag: $formatted_instances"
-        
-      # - name: AWS SSM Send-Command
-      #   uses: peterkimzz/aws-ssm-send-command@v1.1.1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     command: |
-      #       sudo docker-compose stop
-      #       sudo docker-compose rm -f
-      #       sudo docker-compose pull
-      #       sudo docker-compose up -d
-      #       sudo docker image prune -af
-      #     # Comment for Send-Command
-      #     comment: docker-compose.yml file re-pulls newer versions of book-portal images and runs them on the instance.
+
+          # Set the output variable
+          echo "::set-output name=instance-ids::$formatted_instances"
+
+      - name: AWS SSM Send-Command
+        uses: peterkimzz/aws-ssm-send-command@v1.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          instance-ids: ${{ steps.ec2instances.outputs.instance-ids }}
+          command: |
+            sudo docker run -d -p 5678:8080 --name http-echo spiffaz/http-echo:amd64-1.0.1
+            sudo docker image prune -af
+          # Comment for Send-Command
+          comment: docker-compose.yml file re-pulls newer versions of book-portal images and runs them on the instance.
