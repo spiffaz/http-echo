@@ -142,3 +142,8 @@ jobs:
           push: true
           dockerfile: ./Dockerfile
           tags: spiffaz/http-echo:latest
+          build-args: |
+            TARGETOS=linux
+            TARGETARCH=amd64
+            PRODUCT_VERSION=1
+            BIN_NAME=http-echo
