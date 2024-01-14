@@ -147,7 +147,7 @@ jobs:
         uses: Azure/container-scan@v0
         id: scan
         with:
-          image: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
+          image-name: spiffaz/${{env.repo}}:${{ matrix.arch }}-${{env.version}}
 
       # - name: Save Scan Report
       #   run: echo "${{ steps.scan.outputs.scan-report }}" > scan-report.json
@@ -183,3 +183,14 @@ jobs:
             TARGETARCH=${{ matrix.arch }}
             PRODUCT_VERSION=${{env.version}}
             BIN_NAME=${{env.repo}}
+            
+  # CD:
+  #   needs:
+  #     - CI-build-docker-default
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       goos: [linux]
+  #       goarch: ["arm", "arm64", "386", "amd64"]
+
+  #     fail-fast: true
