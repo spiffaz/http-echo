@@ -211,11 +211,8 @@ jobs:
                        --filter "Name=tag:Name,Values=Microservice-asg" \
                        --output json)
 
-          # Extract instance IDs and format them
-          formatted_instances=""
-          for id in $(echo $instances | jq -r '.[]'); do
-            formatted_instances+="  $id"$'\n'
-          done
+          # Remove square brackets and quotes, and replace commas with new lines
+          formatted_instances=$(echo $instances | jq -r '.[] | @text' | tr -d '[],"')
 
           echo "Running EC2 Instances with the specified tag: $formatted_instances"
         
